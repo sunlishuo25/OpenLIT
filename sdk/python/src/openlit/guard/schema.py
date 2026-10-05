@@ -29,7 +29,11 @@ def _validate_json_schema(
             "null": type(None),
         }
         expected = type_map.get(schema_type)
-        if expected and not isinstance(data, expected):
+        # Python bool subclasses int, but JSON booleans are not numeric values.
+        if expected and (
+            not isinstance(data, expected)
+            or (schema_type in ("number", "integer") and isinstance(data, bool))
+        ):
             return (
                 f"Expected {schema_type} at {path or 'root'}, got {type(data).__name__}"
             )
